@@ -9,7 +9,7 @@ from datetime import timedelta
 from bs4 import BeautifulSoup
 
 #import html5lib
-
+from bRGovScrapy.items import BrgovscrapyItem
 
 jieba.load_userdict('data/dict.txt')
 jieba.analyse.set_stop_words('data/stopword.txt')
@@ -39,10 +39,13 @@ class NcGovPurchase(scrapy.Spider):
 
         yesterday_str = '2018-03-16'
 
+
         for a in a_list:
 
             #每天爬取前一天数据，对日期做一个限色
             date_web = a.find_next("div",class_='date').string
+
+            item = BrgovscrapyItem()
 
             if date_web == yesterday_str:
 
@@ -63,9 +66,16 @@ class NcGovPurchase(scrapy.Spider):
 
                 key = jieba.analyse.extract_tags(qd_table.getText(), topK=50, withFlag=False, allowPOS=('n', 'vn', 'v', 'nbr'))
 
+                keywords = ''
+
+                for k in key:
+                    keywords = keywords + k + ' '
+
+
+                item['keywords'] = key
+                item['url'] = URL
+                item['title'] = yesterday_str
+                yield item
 
 
 
-
-        # str = qd_table.getText()
-        # key = jieba.analyse.extract_tags(str, topK=50, withFlag=False, allowPOS=('n', 'vn', 'v', 'nbr'))

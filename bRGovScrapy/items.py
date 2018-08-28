@@ -9,8 +9,7 @@ import scrapy
 
 
 class BrgovscrapyItem(scrapy.Item):
-    # define the fields for your item here like:
     url = scrapy.Field()
     title = scrapy.Field()
     keywords = scrapy.Field()
-    pass
+
