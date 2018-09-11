@@ -20,30 +20,30 @@ yesterday = date + timedelta(days = -1)
 yesterday_str = str(yesterday)
 
 class NcGovPurchase(scrapy.Spider):
-    name = "nc_gov_purchase"
-    allowed_domains = ["ncszfcg.gov.cn"]
-    start_urls = ["http://www.ncszfcg.gov.cn/more2018.cfm?sid=100002003&c_code=&area="]
+    name = "jx_gov_purchase"
+    allowed_domains = ["jxsggzy.cn"]
+    start_urls = ["http://www.jxsggzy.cn/web/jyxx/002006/002006001/jyxx.html"]
 
 
     def parse(self,response):
 
-        dome_url = 'http://www.ncszfcg.gov.cn/'
+        dome_url = 'http://www.jxsggzy.cn'
         data = response.body
 
         soup = BeautifulSoup(data)
 
 
-        list_box = soup.find_all("ul", class_='listbox')
+        list_box = soup.find_all("div", class_='ewb-infolist')
 
         a_list = list_box[0].find_all('a')
 
-        yesterday_str = '2018-03-16'
+        yesterday_str = '2018-09-11'
 
 
         for a in a_list:
 
             #每天爬取前一天数据，对日期做一个限色
-            date_web = a.find_next("div",class_='date').string
+            date_web = a.find_next("span",class_='ewb-list-date').string
 
             item = BrgovscrapyItem()
 
@@ -52,15 +52,14 @@ class NcGovPurchase(scrapy.Spider):
                 URL = dome_url +a['href']
 
 
-                page = urllib2.urlopen(URL)
+                page = urllib2.urlopen('http://www.jxsggzy.cn/web/jyxx/002006/002006001/20180911/fc08669a-caa0-4965-82df-5a46b1c31c1f.html')
+
 
                 d_soup = BeautifulSoup(page)
 
-                qd_tables = d_soup.find_all("table", class_="MsoNormalTable")
+                qd_tables = d_soup.find_all("table")
 
-                if len(qd_tables)>=2:
-                    qd_table = qd_tables[1]
-                elif len(qd_tables)==1:
+                if len(qd_tables)>0:
                     qd_table = qd_tables[0]
                 else:
                     continue
@@ -72,7 +71,7 @@ class NcGovPurchase(scrapy.Spider):
                 for k in key:
                     keywords = keywords + k + ' '
 
-
+                print keywords
                 item['keywords'] = key
                 item['url'] = URL
                 item['title'] = yesterday_str
