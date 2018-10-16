@@ -13,3 +13,7 @@ class BrgovscrapyItem(scrapy.Item):
     title = scrapy.Field()
     keywords = scrapy.Field()
 
+    class_stock = scrapy.Field()
+    type_stock = scrapy.Field()
+    scope_stock = scrapy.Field()
+

@@ -3,6 +3,8 @@ import scrapy
 import urllib2
 import jieba.analyse
 import datetime
+import re
+
 from datetime import timedelta
 
 
@@ -37,7 +39,7 @@ class NcGovPurchase(scrapy.Spider):
 
         a_list = list_box[0].find_all('a')
 
-        yesterday_str = '2018-09-11'
+        yesterday_str = '2018-10-16'
 
 
         for a in a_list:
@@ -71,11 +73,56 @@ class NcGovPurchase(scrapy.Spider):
                 for k in key:
                     keywords = keywords + k + ' '
 
-                print keywords
+
                 item['keywords'] = key
                 item['url'] = URL
                 item['title'] = yesterday_str
-                yield item
+
+                #ur'招标代理(?:机构|单位)[:：]?[\W]{6,}[司]'
+
+
+                strip_line = a.string.strip()
+
+
+                # 服务类，工程类，货物
+                # 公示，公告
+                # 公开，邀请，竞争
+
+                if re.search(ur'公开招标',strip_line,0) != None:
+                    item['class_stock'] = '公开'
+                elif re.search(ur'邀请(?:招标|书)', strip_line, 0) != None:
+                    item['class_stock'] = '邀请'
+                elif re.search(ur'竞争性', strip_line, 0) != None:
+                    item['class_stock'] = '竞争'
+                else:
+                    item['class_stock'] = '全部'
+
+                if re.search(ur'(?:公示|预公示)$', strip_line, 0) != None:
+                    item['type_stock'] = '公示'
+                elif re.search(ur'公告$', strip_line, 0) != None:
+                    item['type_stock'] = '公告'
+                else:
+                    item['type_stock'] = '不知道'
+
+                if re.search(ur'工程', strip_line, 0) != None:
+                    item['scope_stock'] = '工程类'
+                elif re.search(ur'服务', strip_line, 0) != None:
+                    item['scope_stock'] = '服务类'
+                else:
+                    item['scope_stock'] = '货物'
+
+                print strip_line
+                print item['class_stock'] +'=========='+item['type_stock']+"========"+item['scope_stock']
+
+
+
+
+
+
+                # class_stock = scrapy.Field()
+                # type_stock = scrapy.Field()
+                # scope_stock = scrapy.Field()
+
 
 
 
